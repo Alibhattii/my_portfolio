@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        font-family: "Poppins", Arial, sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .card {
+        background: #fff;
+        width: 100%;
+        max-width: 380px;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        animation: fadeIn .5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #0d47a1;
+        font-weight: 600;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        font-size: 15px;
+        border-radius: 8px;
+        border: 1px solid #b0bec5;
+        transition: .2s;
+    }
+
+    input:focus {
+        border-color: #1e88e5;
+        outline: none;
+        box-shadow: 0 0 4px rgba(30,136,229,.4);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 10px;
+        background: #1e88e5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .3s;
+    }
+
+    button:hover {
+        background: #1565c0;
+    }
+
+    #dashboard {
+        display: none;
+        text-align: center;
+    }
+
+    .btn {
+        display: block;
+        margin: 12px auto;
+        background: #0d47a1;
+        padding: 12px;
+        width: 85%;
+        color: #fff;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: .3s;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        background: #08306b;
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 480px) {
+        .card {
+            padding: 20px;
+        }
+        .btn {
+            width: 95%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <!-- LOGIN -->
+    <div id="login">
+        <h3>Admin Login</h3>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="error" style="color:red;text-align:center;"></p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+        <h3>Admin Dashboard</h3>
+
+        <p style="font-size:17px;">
+            <b>Form Submissions:</b> 
+            <span id="count" style="color:#0d47a1;">Loading...</span>
+        </p>
+
+        <div class="btn" onclick="showMsg()">Show Messages</div>
+
+        <a id="sheetLink" class="btn" target="_blank">Google Sheet</a>
+
+        <a href="mailto:frontify7@gmail.com" class="btn">Email</a>
+    </div>
+</div>
+
+<script>
+// ----------------- CONFIG ------------------
+const GOOGLE_SHEET_URL = 
+"https://docs.google.com/spreadsheets/d/1JvqU5TkwbsqoC6sIymhfnISrzTsGYJqloaM-ZgzFyA8/edit?usp=sharing";
+
+document.getElementById("sheetLink").href = GOOGLE_SHEET_URL;
+
+// YOUR WORKING COUNT SCRIPT URL:
+const SCRIPT_COUNT_URL = 
+"https://script.google.com/macros/s/AKfycbwLy95o6qtds9u6-Z_KklV3mtzlrlpPB6TdmbG3J5fwi05p2oZRZVO58Mb6dOS1Wa1CfA/exec";
+// --------------------------------------------
+
+
+// LOGIN SYSTEM
+function login() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+
+    if (user === "A" && pass === "ali") {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadCount();
+    } else {
+        document.getElementById("error").innerText = "Invalid username or password";
+    }
+}
+
+// POPUP MESSAGE
+function showMsg() {
+    alert("This feature is under construction. Try later.");
+}
+
+// LOAD FORM SUBMISSION COUNT
+function loadCount() {
+    fetch(SCRIPT_COUNT_URL)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("count").innerText = data.count;
+    })
+    .catch(err => {
+        document.getElementById("count").innerText = "Error loading";
+        console.error(err);
+    });
+}
+</script>
+
+</body>
+</html>

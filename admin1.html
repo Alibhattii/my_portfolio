@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Panel — Muhammad Ali Bhatti</title>
+    <link rel="shortcut icon" href="./ali.jpg" type="image/x-icon">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <!-- Icons + Chart.js -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --accent: #1e88e5;
+            --text: #1f2937;
+            --muted: #64748b;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0b1020;
+            --card: #071029;
+            --accent: #4f8bf5;
+            --text: #e6eef9;
+            --muted: #9aa7bf;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, var(--bg), #e8f0ff 60%);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 16px;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+            transform: translateX(-20px);
+            transition: transform .35s ease, box-shadow .2s;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+            background: var(--card);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .brand .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #0b63bf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700
+        }
+
+        .nav-btn {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--muted);
+            margin: 8px 0;
+        }
+
+        .nav-btn.active {
+            background: rgba(30, 136, 229, 0.08);
+            color: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            min-height: 540px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 10px 35px rgba(15, 23, 42, 0.06);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .search {
+            width: 300px;
+            max-width: 40%;
+        }
+
+        input.search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #e6eef9;
+            background: transparent;
+            color: var(--text)
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .small-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background: var(--accent);
+            color: white;
+            font-weight: 600
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: var(--muted)
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .stat {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.06), transparent);
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .table-wrap {
+            margin-top: 18px;
+            overflow: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        th {
+            background: linear-gradient(180deg, var(--accent), #0b63bf);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1
+        }
+
+        td .name {
+            font-weight: 600;
+            color: var(--text)
+        }
+
+        .actions .btn {
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: none;
+            background: #ffeef0;
+            color: #ef4444;
+            font-weight: 700
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.35);
+            z-index: 60;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 95%;
+            max-width: 1000px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        @media(max-width:900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .wrap {
+                flex-direction: column;
+                padding: 10px;
+                margin-top: 60px;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 99;
+                transform: translateX(-100%);
+                border-radius: 0;
+                overflow-y: auto;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .charts {
+                grid-template-columns: 1fr
+            }
+
+            table {
+                min-width: 700px
+            }
+
+            .search {
+                max-width: 55%
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .controls {
+                width: 100%;
+            }
+
+            .search {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media(max-width:768px) {
+            .wrap {
+                margin: 60px 8px 8px 8px;
+                padding: 8px;
+            }
+
+            .main {
+                padding: 12px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 12px;
+            }
+
+            .table-wrap {
+                margin-top: 12px;
+            }
+
+            table {
+                min-width: 800px;
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+
+            .charts {
+                margin-top: 12px;
+            }
+
+            .card-chart {
+                padding: 10px !important;
+            }
+
+            .topbar h2 {
+                font-size: 20px;
+            }
+
+            .nav-btn {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+
+            .brand {
+                margin-bottom: 16px;
+            }
+        }
+
+        @media(max-width:480px) {
+            .wrap {
+                margin: 60px 4px 4px 4px;
+                padding: 4px;
+            }
+
+            .main {
+                padding: 10px;
+            }
+
+            .sidebar {
+                padding: 16px;
+            }
+
+            .topbar h2 {
+                font-size: 18px;
+            }
+
+            .stat {
+                padding: 10px;
+            }
+
+            #kTotal, #kEmails {
+                font-size: 18px;
+            }
+
+            #kIp {
+                font-size: 14px;
+            }
+
+            table {
+                min-width: 900px;
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 6px 8px;
+            }
+
+            .small-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .search-input {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            .modal-card {
+                padding: 16px;
+                margin: 16px;
+            }
+
+            .login-card {
+                padding: 16px;
+            }
+        }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.35), rgba(2, 6, 23, 0.35));
+            z-index: 9999;
+        }
+
+        .login-card {
+            width: 380px;
+            max-width: 92%;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(2, 6, 23, 0.3);
+            transform: translateY(20px);
+            animation: slideIn .45s ease both
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(30px);
+                opacity: 0
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
+        }
+
+        .login-card h3 {
+            margin: 0 0 12px 0;
+            text-align: center
+        }
+
+        .field {
+            margin: 8px 0
+        }
+
+        .field input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.06)
+        }
+
+        .login-note {
+            font-size: 13px;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 8px
+        }
+
+        .theme-toggle {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: transparent;
+            cursor: pointer
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 13px
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" id="mobileMenuBtn">
+        <span class="material-icons">menu</span>
+    </button>
+
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h3>Admin Login</h3>
+            <div class="field"><input id="loginUser" placeholder="Username" autocomplete="off"></div>
+            <div class="field"><input id="loginPass" type="password" placeholder="Password"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="small-btn" style="flex:1" onclick="doLogin()">Login</button>
+                <button class="ghost" style="flex:1" onclick="fillDemo()">Demo</button>
+            </div>
+            <p id="loginError" class="login-note" style="color:#ef4444"></p>
+            <p class="login-note">Username: <b>Username</b> | Password: <b>Password</b></p>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <!-- Sidebar -->
+        <aside class="sidebar open" id="sidebar">
+            <div class="brand">
+                <div class="logo">M.AB</div>
+                <div>
+                    <div style="font-weight:700">Muhammad Ali Bhatti Admin</div>
+                    <div style="font-size:12px;color:var(--muted)">Manage Contact Submissions</div>
+                </div>
+            </div>
+
+            <div id="navList">
+                <div class="nav-btn active" data-section="dashboard" onclick="navTo(event)">
+                    <span class="material-icons">dashboard</span> Dashboard
+                </div>
+                <div class="nav-btn" data-section="messages" onclick="navTo(event)">
+                    <span class="material-icons">message</span> Messages
+                </div>
+                <div class="nav-btn" data-section="analytics" onclick="navTo(event)">
+                    <span class="material-icons">analytics</span> Analytics
+                </div>
+                <div class="nav-btn" onclick="openSheet()">
+                    <span class="material-icons">grid_on</span> Open Google Sheet
+                </div>
+            </div>
+
+            <div style="margin-top:18px;display:flex;gap:8px;flex-direction:column">
+                <button class="theme-toggle" onclick="logout()">Logout</button>
+                <div style="font-size:13px;color:var(--muted);margin-top:6px">Email: <a
+                        href="mailto:frontify7@gmail.com">frontify7@gmail.com</a></div>
+            </div>
+        </aside>
+
+        <!-- Main area -->
+        <main class="main" id="mainArea">
+            <div class="topbar">
+                <div>
+                    <h2 id="pageTitle">Dashboard</h2>
+                    <div style="font-size:13px;color:var(--muted)" id="subtitle">Overview & quick actions</div>
+                </div>
+
+                <div class="controls">
+                    <input class="search-input" id="searchBox" placeholder="Search name, email or message..."
+                        oninput="renderTable()">
+                    <button class="small-btn" onclick="refreshData()">Refresh</button>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="cards" id="kpiRow">
+                <div class="stat">
+                    <div style="font-size:13px;color:var(--muted)">Total Submissions</div>
+                    <div style="font-size:20px;font-weight:700" id="kTotal">—</div>
+                </div>
+                <div class="stat">
+                    <div style="font-size:13px;color:var(--muted)">Unique Emails</div>
+                    <div style="font-size:20px;font-weight:700" id="kEmails">—</div>
+                </div>
+                <div class="stat">
+                    <div style="font-size:13px;color:var(--muted)">Recent IP</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--accent)" id="kIp">—</div>
+                </div>
+            </div>
+
+            <!-- Messages table -->
+            <div class="table-wrap" id="tableSection" style="margin-top:18px;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th style="width:170px">Name</th>
+                            <th style="width:200px">Email</th>
+                            <th>Message</th>
+                            <th style="width:120px">Phone</th>
+                            <th style="width:120px">Device</th>
+                            <th style="width:120px">Browser</th>
+                            <th style="width:120px">IP</th>
+                            <th style="width:120px">Date</th>
+                            <th style="width:90px">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">
+                                <div id="loadingMsg">Loading data...</div>
+                                <div id="errorMsg" style="display:none;color:#ef4444">Failed to load data. Please check your connection and try again.</div>
+                                <div id="emptyMsg" style="display:none">No data available</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts" style="margin-top:18px">
+                <div class="card-chart" style="background:var(--card);padding:12px;border-radius:12px;">
+                    <div style="font-weight:700;margin-bottom:6px">Submissions Per Day</div>
+                    <canvas id="barChart" height="160"></canvas>
+                </div>
+
+                <div class="card-chart" style="background:var(--card);padding:12px;border-radius:12px;">
+                    <div style="font-weight:700;margin-bottom:6px">Top Email Domains</div>
+                    <canvas id="pieChart" height="160"></canvas>
+                </div>
+            </div>
+
+            <footer>   Muhammad Ali Bhatti Admin Panel • Mobile friendly • Smooth animations</footer>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-card">
+            <h3>Delete Entry</h3>
+            <p id="confirmText">Are you sure you want to delete this message?</p>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+                <button class="ghost" onclick="closeConfirm()">Cancel</button>
+                <button class="small-btn" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* CONFIG */
+        const GOOGLE_SHEET_URL = "Your Google Sheet URL";
+        const SHEET_ID = "Your Google Sheet ID";
+        const SCRIPT_URL = "Your Script URL";
+        const ADMIN_USER = "Username";
+        const ADMIN_PASS = "Password";
+        
+        // Helper function to parse CSV (handles quoted fields with commas)
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length === 0) return [];
+            
+            function parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            current += '"';
+                            i++; // Skip next quote
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current.trim());
+                return result;
+            }
+            
+            const headers = parseCSVLine(lines[0]).map(h => h.replace(/^"|"$/g, ''));
+            const rows = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]).map(v => v.replace(/^"|"$/g, ''));
+                if (values.some(v => v)) { // Only add non-empty rows
+                    const obj = {};
+                    headers.forEach((header, idx) => {
+                        if (header) {
+                            const key = header.toLowerCase().replace(/\s+/g, '').trim();
+                            obj[key] = values[idx] || '';
+                            obj[header.trim()] = values[idx] || '';
+                        }
+                    });
+                    rows.push(obj);
+                }
+            }
+            return rows;
+        }
+
+        let appData = [];
+        let deleteIndex = null;
+
+        /* Helpers */
+        function $(s) { return document.querySelector(s); }
+        function elAll(q) { return Array.from(document.querySelectorAll(q)); }
+        function escapeHtml(s) { if (!s) return ''; return String(s).replace(/[&<>"'`]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' })[c]); }
+        function detectDeviceFromUA(ua) { if (!ua) return 'Unknown'; ua = ua.toLowerCase(); if (/mobile|iphone|android/.test(ua)) return 'Mobile'; if (/ipad|tablet/.test(ua)) return 'Tablet'; return 'Desktop'; }
+        function parseBrowser(ua) { if (!ua) return 'Unknown'; ua = ua.toLowerCase(); if (ua.includes('chrome') && !ua.includes('edg')) return 'Chrome'; if (ua.includes('firefox')) return 'Firefox'; if (ua.includes('safari') && !ua.includes('chrome')) return 'Safari'; if (ua.includes('edg')) return 'Edge'; return ua.split(' ')[0]; }
+        function formatDate(v, short = false) { if (!v) return '—'; const d = new Date(v); if (isNaN(d)) { const parsed = Date.parse(v); if (!isNaN(parsed)) return short ? new Date(parsed).toLocaleDateString() : new Date(parsed).toLocaleString(); return v; } return short ? d.toLocaleDateString() : d.toLocaleString(); }
+        function generatePalette(n) { const base = ['#1e88e5', '#4caf50', '#ff9800', '#9c27b0', '#ef5350', '#00bcd4', '#ffc107', '#8bc34a']; if (n <= base.length) return base.slice(0, n); const out = []; for (let i = 0; i < n; i++) out.push(`hsl(${i * (360 / n)},70%,50%)`); return out; }
+
+        function toggleMobileMenu() {
+            $('#sidebar').classList.toggle('open');
+        }
+
+        function logout() { location.reload(); }
+        function openSheet() { window.open(GOOGLE_SHEET_URL, '_blank'); }
+        function fillDemo() { $('#loginUser').value = ADMIN_USER; $('#loginPass').value = ADMIN_PASS; }
+
+        function doLogin() {
+            const user = $('#loginUser').value.trim();
+            const pass = $('#loginPass').value.trim();
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                $('#loginOverlay').style.display = 'none';
+                refreshData();
+            } else $('#loginError').innerText = 'Invalid credentials!';
+        }
+
+        async function refreshData() {
+            const loadingMsg = $('#loadingMsg');
+            const errorMsg = $('#errorMsg');
+            const emptyMsg = $('#emptyMsg');
+            
+            try {
+                loadingMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                emptyMsg.style.display = 'none';
+                
+                // Try multiple URL variations to get actual data
+                let res;
+                let data;
+                let urlVariations = [
+                    SCRIPT_URL + '?action=getData&t=' + Date.now(),
+                    SCRIPT_URL + '?format=json&t=' + Date.now(),
+                    SCRIPT_URL + '?data=true&t=' + Date.now(),
+                    SCRIPT_URL + '?t=' + Date.now()
+                ];
+                
+                // Try each URL variation until we get actual data
+                for (const url of urlVariations) {
+                    try {
+                        res = await fetch(url);
+                        if (!res.ok) continue;
+                        
+                        data = await res.json();
+                        console.log('Trying URL:', url);
+                        console.log('Response:', data);
+                        
+                        // Check if we got actual data (not just count)
+                        if (Array.isArray(data) || 
+                            (data && typeof data === 'object' && 
+                             (Array.isArray(data.data) || Array.isArray(data.rows) || 
+                              Array.isArray(data.values) || Array.isArray(data.result) ||
+                              Object.keys(data).some(k => Array.isArray(data[k]) && k !== 'count')))) {
+                            console.log('Found data with URL:', url);
+                            break;
+                        }
+                    } catch (e) {
+                        console.log('Failed with URL:', url, e);
+                        continue;
+                    }
+                }
+                
+                if (!res || !res.ok) {
+                    throw new Error(`HTTP error! status: ${res?.status || 'unknown'}`);
+                }
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                // Handle case where response might be a string
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        console.warn('Failed to parse string response:', e);
+                    }
+                }
+                
+                console.log('Raw data from API:', data); // Debug log
+                console.log('Data type:', typeof data);
+                console.log('Is array?', Array.isArray(data));
+                console.log('Data keys:', data && typeof data === 'object' ? Object.keys(data) : 'N/A');
+                
+                // If data is null or undefined, show error
+                if (!data) {
+                    throw new Error('No data received from API');
+                }
+                
+                // If we only got count, try to fetch using Google Sheets API format
+                if (data.count !== undefined && !Array.isArray(data) && 
+                    !data.data && !data.rows && !data.values && !data.result) {
+                    console.log('Only count received, trying alternative fetch method...');
+                    // Try fetching as CSV or using different endpoint
+                    try {
+                        const altRes = await fetch(SCRIPT_URL + '?sheet=data&t=' + Date.now());
+                        if (altRes.ok) {
+                            const altData = await altRes.json();
+                            if (altData && (Array.isArray(altData) || altData.data || altData.rows || altData.values)) {
+                                data = altData;
+                                console.log('Got data from alternative endpoint');
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Alternative fetch failed:', e);
+                    }
+                }
+                
+                appData = [];
+                
+                // Handle different data formats
+                if (Array.isArray(data)) {
+                    // Direct array of objects
+                    console.log('Processing as direct array');
+                    appData = data.filter(row => row && Object.keys(row).length > 0);
+                } else if (data && typeof data === 'object') {
+                    // Log all properties to help debug
+                    console.log('Data object properties:', Object.keys(data));
+                    for (const key in data) {
+                        console.log(`  ${key}:`, typeof data[key], Array.isArray(data[key]) ? `(array, length: ${data[key].length})` : '');
+                    }
+                    
+                    // Try common property names
+                    if (data.data && Array.isArray(data.data)) {
+                        console.log('Found data.data array');
+                        appData = data.data.filter(row => row && Object.keys(row).length > 0);
+                    } else if (data.rows && Array.isArray(data.rows)) {
+                        console.log('Found data.rows array');
+                        appData = data.rows.filter(row => row && Object.keys(row).length > 0);
+                    } else if (data.values && Array.isArray(data.values) && data.values.length > 0) {
+                        console.log('Found data.values array (2D format)');
+                        // Handle Google Sheets format with headers (2D array)
+                        const headers = data.values[0] || [];
+                        console.log('Headers:', headers);
+                        if (headers.length > 0) {
+                            appData = data.values.slice(1)
+                                .filter(row => row && row.some(cell => cell && cell.toString().trim() !== ''))
+                                .map(row => {
+                                    const obj = {};
+                                    headers.forEach((header, idx) => {
+                                        if (header) {
+                                            // Normalize header to lowercase, remove spaces
+                                            const key = header.toString().toLowerCase().replace(/\s+/g, '').trim();
+                                            const value = row[idx] || '';
+                                            obj[key] = value;
+                                            // Also keep original header name for compatibility
+                                            obj[header.toString().trim()] = value;
+                                        }
+                                    });
+                                    return obj;
+                                });
+                            console.log('Converted 2D array to objects:', appData.length, 'rows');
+                        }
+                    } else if (data.result && Array.isArray(data.result)) {
+                        console.log('Found data.result array');
+                        appData = data.result.filter(row => row && Object.keys(row).length > 0);
+                    } else {
+                        // Try to find any array property (more thorough search, skip 'count')
+                        console.log('Searching for array properties...');
+                        for (const key in data) {
+                            // Skip count property
+                            if (key === 'count' || key === 'total' || key === 'length') continue;
+                            
+                            const value = data[key];
+                            if (Array.isArray(value)) {
+                                console.log(`Found array property: ${key}, length: ${value.length}`);
+                                if (value.length > 0) {
+                                    // Check if it's a 2D array (array of arrays)
+                                    if (Array.isArray(value[0])) {
+                                        console.log('Detected 2D array format');
+                                        const headers = value[0] || [];
+                                        if (headers.length > 0) {
+                                            appData = value.slice(1)
+                                                .filter(row => row && row.some(cell => cell && cell.toString().trim() !== ''))
+                                                .map(row => {
+                                                    const obj = {};
+                                                    headers.forEach((header, idx) => {
+                                                        if (header) {
+                                                            const key = header.toString().toLowerCase().replace(/\s+/g, '').trim();
+                                                            const val = row[idx] || '';
+                                                            obj[key] = val;
+                                                            obj[header.toString().trim()] = val;
+                                                        }
+                                                    });
+                                                    return obj;
+                                                });
+                                        }
+                                    } else {
+                                        // Regular array of objects
+                                        appData = value.filter(row => row && Object.keys(row).length > 0);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // If still no data and we have count, try fetching directly from Google Sheets using CORS proxy
+                        if (appData.length === 0 && data.count > 0) {
+                            console.log('Count is', data.count, 'but no data array found. Trying direct Sheets fetch with CORS proxy...');
+                            try {
+                                // Try multiple sheet names (FormResponses is common, but might be different)
+                                const sheetNames = ['FormResponses', 'Sheet1', 'Form Responses', ''];
+                                let csvText = null;
+                                
+                                for (const sheetName of sheetNames) {
+                                    const sheetParam = sheetName ? `&sheet=${encodeURIComponent(sheetName)}` : '';
+                                    const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv${sheetParam}`;
+                                    console.log('Trying sheet name:', sheetName || 'default', 'URL:', csvUrl);
+                                    
+                                    // Use CORS proxy services
+                                    const corsProxies = [
+                                        `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`,
+                                        `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`,
+                                        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(csvUrl)}`
+                                    ];
+                                
+                                    for (const proxyUrl of corsProxies) {
+                                        try {
+                                            console.log('Trying CORS proxy:', proxyUrl);
+                                            const csvRes = await fetch(proxyUrl, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'Accept': 'text/csv, text/plain, */*'
+                                                }
+                                            });
+                                            if (csvRes.ok) {
+                                                csvText = await csvRes.text();
+                                                console.log('CSV data received via proxy, length:', csvText.length);
+                                                console.log('CSV preview:', csvText.substring(0, 200));
+                                                // Validate CSV has content and headers
+                                                if (csvText && csvText.length > 10 && csvText.includes(',')) {
+                                                    break; // Found valid CSV, exit both loops
+                                                } else {
+                                                    csvText = null; // Invalid CSV, try next proxy
+                                                }
+                                            }
+                                        } catch (proxyError) {
+                                            console.log('Proxy failed, trying next...', proxyError);
+                                            continue;
+                                        }
+                                    }
+                                    
+                                    if (csvText && csvText.length > 10) {
+                                        break; // Found valid CSV, exit sheet name loop
+                                    }
+                                }
+                                
+                                if (csvText && csvText.length > 10) {
+                                    appData = parseCSV(csvText);
+                                    console.log('Parsed CSV rows:', appData.length);
+                                    if (appData.length > 0) {
+                                        console.log('First parsed row:', appData[0]);
+                                    }
+                                } else {
+                                    // If CSV didn't work, try JSON export via proxy
+                                    const jsonUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=FormResponses`;
+                                    const jsonProxies = [
+                                        `https://api.allorigins.win/raw?url=${encodeURIComponent(jsonUrl)}`,
+                                        `https://corsproxy.io/?${encodeURIComponent(jsonUrl)}`,
+                                        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(jsonUrl)}`
+                                    ];
+                                    for (const proxyJsonUrl of jsonProxies) {
+                                        try {
+                                            console.log('Trying JSON via proxy:', proxyJsonUrl);
+                                            const jsonRes = await fetch(proxyJsonUrl, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'Accept': 'application/json, text/javascript, */*'
+                                                }
+                                            });
+                                            if (jsonRes.ok) {
+                                                const jsonText = await jsonRes.text();
+                                                // Remove the callback wrapper (google.visualization.Query.setResponse(...))
+                                                const jsonMatch = jsonText.match(/google\.visualization\.Query\.setResponse\((.*)\);/);
+                                                if (jsonMatch) {
+                                                    const sheetData = JSON.parse(jsonMatch[1]);
+                                                    if (sheetData.table && sheetData.table.rows) {
+                                                        const headers = sheetData.table.cols.map(col => col.label);
+                                                        appData = sheetData.table.rows.map(row => {
+                                                            const obj = {};
+                                                            row.c.forEach((cell, idx) => {
+                                                                const header = headers[idx] || '';
+                                                                if (header) {
+                                                                    const key = header.toLowerCase().replace(/\s+/g, '').trim();
+                                                                    const value = cell ? (cell.v || cell.f || '') : '';
+                                                                    obj[key] = value;
+                                                                    obj[header.trim()] = value;
+                                                                }
+                                                            });
+                                                            return obj;
+                                                        });
+                                                        console.log('Parsed JSON rows:', appData.length);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        } catch (jsonError) {
+                                            continue;
+                                        }
+                                    }
+                                }
+                                
+                                if (appData.length === 0) {
+                                    throw new Error('Could not fetch data from Google Sheets');
+                                }
+                            } catch (fetchError) {
+                                console.error('Direct Sheets fetch failed:', fetchError);
+                                // Show helpful error message
+                                errorMsg.innerHTML = `API returned count (${data.count}) but no data array.<br><br>
+                                    <strong>Solution:</strong> Your Google Apps Script needs to return the actual data rows.<br>
+                                    Instead of: <code>return JSON.stringify({count: dataRows.length});</code><br>
+                                    Use: <code>return JSON.stringify(dataRows);</code> or <code>return ContentService.createTextOutput(JSON.stringify(dataRows)).setMimeType(ContentService.MimeType.JSON);</code><br><br>
+                                    <small>Note: Direct Sheets fetch also failed due to CORS restrictions.</small>`;
+                                throw fetchError;
+                            }
+                        }
+                    }
+                }
+                
+                // Filter out completely empty rows
+                appData = appData.filter(row => {
+                    if (!row || typeof row !== 'object') return false;
+                    const hasData = Object.values(row).some(val => 
+                        val !== null && val !== undefined && val.toString().trim() !== ''
+                    );
+                    return hasData;
+                });
+                
+                console.log('Processed appData:', appData); // Debug log
+                console.log('Number of rows:', appData.length); // Debug log
+                if (appData.length > 0) {
+                    console.log('First row sample:', appData[0]);
+                    console.log('First row keys:', Object.keys(appData[0]));
+                }
+                
+                loadingMsg.style.display = 'none';
+                
+                if (appData.length === 0) {
+                    emptyMsg.style.display = 'block';
+                    console.warn('No data found after processing');
+                } else {
+                renderTable();
+                updateKPI();
+                updateCharts();
+                }
+            } catch (e) {
+                console.error('Error fetching data:', e);
+                console.error('Error details:', e.message, e.stack);
+                loadingMsg.style.display = 'none';
+                errorMsg.style.display = 'block';
+                errorMsg.innerHTML = `Failed to load data: ${e.message}. <br>Please check the console for details.`;
+                appData = [];
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            const term = ($('#searchBox')?.value || '').toLowerCase();
+            const body = $('#tableBody');
+            
+            if (!body) return;
+            
+            const filtered = appData.filter(r => {
+                if (!term) return true;
+                // Get all possible field values for search
+                const searchFields = [];
+                for (const key in r) {
+                    const lowerKey = key.toLowerCase();
+                    if (lowerKey === 'name' || lowerKey === 'email' || lowerKey === 'message' || lowerKey === 'phone') {
+                        searchFields.push(String(r[key] || ''));
+                    }
+                }
+                // Also try direct access
+                searchFields.push(
+                    r.name || r.Name || '',
+                    r.email || r.Email || '',
+                    r.message || r.Message || r.msg || '',
+                    r.phone || r.Phone || ''
+                );
+                return searchFields.some(f => f.toLowerCase().includes(term));
+            });
+            
+            if (filtered.length === 0 && appData.length > 0) {
+                body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No results found</td></tr>';
+                return;
+            }
+            
+            if (filtered.length === 0 && appData.length === 0) {
+                body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No data available</td></tr>';
+                return;
+            }
+            
+            body.innerHTML = '';
+            filtered.forEach((row, idx) => {
+                const originalIdx = appData.indexOf(row);
+                    const tr = document.createElement('tr');
+                
+                // Try multiple field name variations (case-insensitive matching)
+                const getName = () => {
+                    for (const key in row) {
+                        if (key.toLowerCase() === 'name') return row[key];
+                    }
+                    return row.name || row.Name || '—';
+                };
+                
+                const getEmail = () => {
+                    for (const key in row) {
+                        if (key.toLowerCase() === 'email') return row[key];
+                    }
+                    return row.email || row.Email || '—';
+                };
+                
+                const getMessage = () => {
+                    for (const key in row) {
+                        if (key.toLowerCase() === 'message') return row[key];
+                    }
+                    return row.message || row.Message || row.msg || '—';
+                };
+                
+                const getPhone = () => {
+                    for (const key in row) {
+                        if (key.toLowerCase() === 'phone') return row[key];
+                    }
+                    return row.phone || row.Phone || '—';
+                };
+                
+                const getDate = () => {
+                    for (const key in row) {
+                        const lowerKey = key.toLowerCase();
+                        if (lowerKey === 'timestamp' || lowerKey === 'date' || lowerKey === 'time') {
+                            return formatDate(row[key]);
+                        }
+                    }
+                    return formatDate(row.date || row.Date || row.timestamp || row.Timestamp || row.time || row.Time);
+                };
+                
+                tr.innerHTML = `<td class="name">${escapeHtml(getName())}</td>
+<td>${escapeHtml(getEmail())}</td>
+<td>${escapeHtml(getMessage())}</td>
+<td>${escapeHtml(getPhone())}</td>
+<td>${escapeHtml(row.device || row.Device || detectDeviceFromUA(row.userAgent || row.useragent || row['User Agent'] || ''))}</td>
+<td>${escapeHtml(row.browser || row.Browser || parseBrowser(row.userAgent || row.useragent || row['User Agent'] || ''))}</td>
+<td>${escapeHtml(row.ip || row.IP || row.Ip || '—')}</td>
+<td>${getDate()}</td>
+<td class="actions"><button onclick="confirmDelete(${originalIdx})" class="btn">X</button></td>`;
+                    body.appendChild(tr);
+                });
+        }
+
+        function updateKPI() {
+            if (!$('#kTotal')) return;
+            
+            $('#kTotal').innerText = appData.length || 0;
+            
+            const emails = appData.map(r => {
+                // Try to find email field case-insensitively
+                for (const key in r) {
+                    if (key.toLowerCase() === 'email') return r[key] || '';
+                }
+                return r.email || r.Email || '';
+            }).filter(e => e && e.toString().trim() !== '');
+            
+            $('#kEmails').innerText = [...new Set(emails)].length || 0;
+            
+            const lastRow = appData[appData.length - 1];
+            if (lastRow) {
+                const lastIp = lastRow.ip || lastRow.IP || lastRow.Ip || '—';
+                $('#kIp').innerText = lastIp;
+            } else {
+                $('#kIp').innerText = '—';
+            }
+        }
+
+        function updateCharts() {
+            // Destroy existing charts if they exist
+            if (window.barChartInstance) {
+                window.barChartInstance.destroy();
+            }
+            if (window.pieChartInstance) {
+                window.pieChartInstance.destroy();
+            }
+            
+            const dates = {};
+            appData.forEach(r => {
+                // Try to find date/timestamp field case-insensitively
+                let dateVal = '';
+                for (const key in r) {
+                    const lowerKey = key.toLowerCase();
+                    if (lowerKey === 'timestamp' || lowerKey === 'date' || lowerKey === 'time') {
+                        dateVal = r[key];
+                        break;
+                    }
+                }
+                if (!dateVal) {
+                    dateVal = r.date || r.Date || r.timestamp || r.Timestamp || r.time || r.Time;
+                }
+                const d = formatDate(dateVal, true);
+                if (d && d !== '—') {
+                    dates[d] = (dates[d] || 0) + 1;
+                }
+            });
+            const barLabels = Object.keys(dates).sort();
+            const barValues = barLabels.map(l => dates[l]);
+            
+            if (barLabels.length > 0) {
+                window.barChartInstance = new Chart($('#barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: barLabels,
+                        datasets: [{
+                            label: 'Submissions',
+                            data: barValues,
+                            backgroundColor: generatePalette(barValues.length)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            const domains = {};
+            appData.forEach(r => {
+                let email = '';
+                for (const key in r) {
+                    if (key.toLowerCase() === 'email') {
+                        email = r[key] || '';
+                        break;
+                    }
+                }
+                if (!email) {
+                    email = r.email || r.Email || '';
+                }
+                const d = email.split('@')[1] || 'unknown.com';
+                domains[d] = (domains[d] || 0) + 1;
+            });
+            const pieLabels = Object.keys(domains);
+            const pieValues = Object.values(domains);
+            
+            if (pieLabels.length > 0) {
+                window.pieChartInstance = new Chart($('#pieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieValues,
+                            backgroundColor: generatePalette(pieValues.length)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                });
+            }
+        }
+
+        function confirmDelete(idx) {
+            deleteIndex = idx;
+            $('#confirmModal').classList.add('open');
+        }
+        
+        function closeConfirm() {
+            $('#confirmModal').classList.remove('open');
+        }
+        
+        $('#confirmDeleteBtn').onclick = () => {
+            if (deleteIndex !== null && appData[deleteIndex]) {
+                appData.splice(deleteIndex, 1);
+                renderTable();
+                updateKPI();
+                updateCharts();
+                closeConfirm();
+            }
+        };
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const sidebar = $('#sidebar');
+            const menuBtn = $('#mobileMenuBtn');
+            if (window.innerWidth <= 900 && sidebar && !sidebar.contains(e.target) && !menuBtn.contains(e.target) && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+        
+        // Close mobile menu on navigation
+        function navTo(e) {
+            elAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            const section = e.currentTarget.dataset.section;
+            $('#pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1);
+            
+            // Close mobile menu on small screens
+            if (window.innerWidth <= 900) {
+                $('#sidebar').classList.remove('open');
+            }
+        }
+    </script>
+</body>
+
+</html>
